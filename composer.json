@@ -1,0 +1,22 @@
+{
+    "name": "POPSUGAR/ShopStyleAPI",
+    "description": "PHP implementation of ShopStyle API",
+    "homepage": "https://github.com/PopSugar/php-popsugar-shopping-api",
+    "keywords":["shopstyle", "api", "product search"],
+    "minimum-stability": "stable",
+    "type": "library",
+    "version": "2.0.1",
+    "authors": [
+        {
+            "name": "POPSUGAR Inc",
+            "homepage":"http://www.shopstyle.com/static/api/index.html"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-0": { "ShopStyle\\": "" }
+    }
+}
