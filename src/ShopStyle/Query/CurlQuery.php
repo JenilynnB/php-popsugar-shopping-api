@@ -3,7 +3,7 @@
 namespace ShopStyle\Query;
 
 
-class CurlQuery
+class CurlQuery implements IQuery
 {
     public function get($url)
     {
