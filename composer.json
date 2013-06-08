@@ -1,5 +1,5 @@
 {
-    "name": "POPSUGAR/ShopStyleAPI",
+    "name": "PopSugar/ShopStyleAPI",
     "description": "PHP implementation of ShopStyle API",
     "homepage": "https://github.com/PopSugar/php-popsugar-shopping-api",
     "keywords":["shopstyle", "api", "product search"],
@@ -8,7 +8,7 @@
     "version": "2.0.1",
     "authors": [
         {
-            "name": "POPSUGAR Inc",
+            "name": "POPSUGAR Inc.",
             "homepage":"http://www.shopstyle.com/static/api/index.html"
         }
     ],
