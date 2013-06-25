@@ -16,6 +16,6 @@
     },
     "license": "MIT",
     "autoload": {
-        "psr-0": { "ShopStyle\\": "" }
+        "psr-0": { "ShopStyle\\": "src" }
     }
 }
