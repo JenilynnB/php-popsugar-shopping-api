@@ -2,7 +2,7 @@
     "name": "popsugar/shopstyle-api",
     "description": "PHP implementation of ShopStyle API",
     "homepage": "https://github.com/PopSugar/php-popsugar-shopping-api",
-    "keywords":["shopstyle", "api", "product search"],
+    "keywords":["shopstyle", "api", "product search", "guzzle"],
     "minimum-stability": "stable",
     "type": "library",
     "authors": [
@@ -12,7 +12,11 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "guzzle/guzzle": "v3.7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
     },
     "license": "MIT",
     "autoload": {

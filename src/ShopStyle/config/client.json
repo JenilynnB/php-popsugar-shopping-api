@@ -1,0 +1,725 @@
+{
+    "name": "ShopStyle API",
+    "baseUrl": "",
+    "apiVersion": "v2",
+    "description": "",
+    "operations": {
+        "formatable": {
+            "abstract": true,
+            "parameters": {
+                "format": {
+                    "location": "query",
+                    "description": "The response format, either 'json', or 'xml'.",
+                    "type": "string",
+                    "enum": ["json", "xml"],
+                    "default": "json"
+                }
+            }
+        },
+        "GetRetailers": {
+            "extends": "formatable",
+            "httpMethod": "GET",
+            "uri": "retailers",
+            "summary": "This method returns a list of retailers that have live products.",
+            "responseNotes": "A list of all Retailers, with id, name, and url of each.",
+            "responseClass": "RetailersOutput"
+        },
+        "GetBrands": {
+            "extends": "formatable",
+            "httpMethod": "GET",
+            "uri": "brands",
+            "summary": "This method returns a list of brands that have live products. Brands that have very few products will be omitted.",
+            "responseNotes": "A list of all Brands, with id, name, url.",
+            "responseClass": "BrandsOutput"
+        },
+        "GetCategories": {
+            "extends": "formatable",
+            "httpMethod": "GET",
+            "uri": "categories",
+            "parameters": {
+                "cat": {
+                    "location": "query",
+                    "description": "The ID of the category to use as the starting point. By default, the global root of the category tree is used"
+                },
+                "depth": {
+                    "location": "query",
+                    "description": "The number of levels from the root to include in the response. By default all the levels are included.",
+                    "type": "integer"
+                }
+            },
+            "summary": "This method returns a list of the categories available to the API",
+            "responseNotes": "A list of all categories, with id, name, and parent id.",
+            "responseClass": "CategoriesOutput"
+        },
+        "GetColors": {
+            "extends": "formatable",
+            "httpMethod": "GET",
+            "uri": "colors",
+            "summary": "This method returns the list of canonical colors available.",
+            "responseNotes": "A list of all Colors, with id, name, and url of each.",
+            "responseClass": "ColorsOutput"
+        },
+
+        "productQuery": {
+            "extends": "formatable",
+            "abstract": true,
+            "parameters": {
+                "freeTextSearch": {
+                    "location": "query",
+                    "description": "Text search terms, as a user would enter in a Search field.",
+                    "type": "string",
+                    "sentAs": "fts"
+                },
+                "category": {
+                    "location": "query",
+                    "description": "A product category. Only products within the category will be returned. ",
+                    "type": "string",
+                    "sentAs": "cat"
+                },
+                "priceDropDate": {
+                    "location": "query",
+                    "description": "A \"price drop date\" expressed as a number of milliseconds since Jan 1, 1970. If present, limits the results to products whose price has dropped since the given date.",
+                    "type": "integer",
+                    "sentAs": "pdd"
+                },
+                "sort": {
+                    "location": "query",
+                    "description": "The sort algorithm to use.",
+                    "type": "string",
+                    "enum": ["PriceLoHi", "PriceHiLo", "Recency", "Popular"],
+                    "default": null
+                },
+                "fl": {
+                    "location": "query",
+                    "type": "array",
+                    "sentAs": "fl",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "brand": {
+                                "type": "string"
+                            },
+                            "retailer": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "filters": [
+                        {
+                            "method": "\\ShopStyle\\Filter\\ProductQueryFilter::convertFilterItem",
+                            "args": [ "@value", "@api" ]
+                        }
+                    ]
+                }
+            }
+        },
+
+        "GetHistogram": {
+            "extends": "productQuery",
+            "httpMethod": "GET",
+            "uri": "products/histogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "description": "A comma-separated list of the filters for which to calculate the histograms. Possible values are Category, Brand, Retailer, Price, Discount, Size and Color.",
+                    "type": "array",
+                    "items": {
+                        "name": "filter",
+                        "type": "enum",
+                        "enum": ["Category", "Brand", "Retailer", "Price", "Discount", "Size", "Color"]
+                    },
+                    "filters": [
+                        {
+                            "method": "implode",
+                            "args": [ ",", "@value" ]
+                        }
+                    ],
+                    "required": true
+                },
+                "floor": {
+                    "location": "query",
+                    "description": "The minimum count of products required for an entry to be included in the histogram.",
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "responseClass": "HistogramOutput",
+            "summary": "This method returns a list of filters and product counts that describe the results of a given product query. The query is specified using the product query parameters.",
+            "responseNotes": "A list of Filter objects of the given type. Each Filter has an id, name, and count of the number of results that apply to that filter."
+        },
+        "GetCategoryHistogram": {
+            "extends": "GetHistogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "type": "string",
+                    "static": true,
+                    "default": "Category"
+                }
+            }
+        },
+        "GetBrandHistogram": {
+            "extends": "GetHistogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "type": "string",
+                    "static": true,
+                    "default": "Brand"
+                }
+            }
+        },
+        "GetRetailerHistogram": {
+            "extends": "GetHistogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "type": "string",
+                    "static": true,
+                    "default": "Retailer"
+                }
+            }
+        },
+        "GetPriceHistogram": {
+            "extends": "GetHistogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "type": "string",
+                    "static": true,
+                    "default": "Price"
+                }
+            }
+        },
+        "GetDiscountHistogram": {
+            "extends": "GetHistogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "type": "string",
+                    "static": true,
+                    "default": "Discount"
+                }
+            }
+        },
+        "GetSizeHistogram": {
+            "extends": "GetHistogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "type": "string",
+                    "static": true,
+                    "default": "Size"
+                }
+            }
+        },
+        "GetColorHistogram": {
+            "extends": "GetHistogram",
+            "parameters": {
+                "filters": {
+                    "location": "query",
+                    "type": "string",
+                    "static": true,
+                    "default": "Color"
+                }
+            }
+        },
+        "GetProducts": {
+            "extends": "productQuery",
+            "httpMethod": "GET",
+            "uri": "products",
+            "parameters": {
+                "offset": {
+                    "location": "query",
+                    "description": "The index of the first product to return, or 0 (zero) if not specified. A client can use this to implement paging through large result sets.",
+                    "type": "integer",
+                    "default": 0
+                },
+                "limit": {
+                    "location": "query",
+                    "description": "The maximum number of results to return, or 100 if not specified. The maximum value is 100. Combine with the offset parameter to implement paging.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 10
+                }
+            },
+            "responseClass": "ProductsOutput",
+            "summary": "This method returns a set of products that match a query, specified using the product query parameters",
+            "responseNotes": "A list of Product objects. Each Product has an id, name, description, price, retailer, brand name, categories, images in small/medium/large, and a URL that forwards to the retailer's site."
+        },
+        "GetProduct": {
+            "extends": "formatable",
+            "httpMethod": "GET",
+            "uri": "products/{prodid}",
+            "parameters": {
+                "prodid": {
+                    "location": "uri",
+                    "description": "Product ID.",
+                    "required": true
+                }
+            },
+            "summary": "This method returns the product with the ID specified in the path.",
+            "responseNotes": "A single Product object. A Product has an id, name, description, price, retailer, brand name, categories, images in small/medium/large, and a URL that forwards to the retailer's site."
+        }
+    },
+
+    "models": {
+        "Retailer": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "location": "json",
+                    "type": "integer"
+                },
+                "name": {
+                    "location": "json",
+                    "type": "string"
+                },
+                "url": {
+                    "location": "json",
+                    "type": "string"
+                }
+            }
+        },
+        "RetailersOutput": {
+            "type": "object",
+            "properties": {
+                "retailers": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Retailer"
+                    }
+                }
+            }
+        },
+        "Brand": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "location": "json",
+                    "type": "integer"
+                },
+                "name": {
+                    "location": "json",
+                    "type": "string"
+                },
+                "url": {
+                    "location": "json",
+                    "type": "string"
+                },
+                "isCommonWord": {
+                    "location": "json",
+                    "type": "boolean"
+                },
+                "synonyms": {
+                    "location": "json",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "location": "json"
+                    }
+                }
+            }
+        },
+        "BrandsOutput": {
+            "type": "object",
+            "properties": {
+                "brands": {
+                    "location": "json",
+                    "type": "array",
+                    "items": {
+                        "$ref": "Brand"
+                    }
+                }
+            }
+        },
+        "CategoriesOutput": {
+            "type": "object",
+            "properties": {
+                "metadata": {
+                    "type": "object",
+                    "properties": {
+                        "root": {
+                            "type": "object",
+                            "parameters": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "shortName": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "maxDepth": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "Category"
+                    }
+                }
+            },
+            "additionalProperties": {
+                "location": "json"
+            }
+        },
+        "ColorsOutput": {
+            "type": "object",
+            "properties": {
+                "colors": {
+                    "location": "json",
+                    "type": "array",
+                    "items": {
+                        "$ref": "Color"
+                    }
+                }
+            }
+        },
+        "ImageSize": {
+            "type": "object",
+            "properties": {
+                "sizeName": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "Image": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "sizes": {
+                    "type": "object",
+                    "items": {
+                        "$ref": "ImageSize"
+                    }
+                }
+            }
+        },
+        "Category": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Color": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProductColor": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "image": {
+                    "$ref": "Image"
+                }
+            }
+        },
+        "ProductSize": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Product": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "priceLabel": {
+                    "type": "string"
+                },
+                "inStock": {
+                    "type": "boolean"
+                },
+                "retailer": {
+                    "$ref": "Retailer"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "brand": {
+                    "$ref": "Brand"
+                },
+                "clickUrl": {
+                    "type": "string"
+                },
+                "pageUrl": {
+                    "type": "string"
+                },
+                "image": {
+                    "$ref": "Image"
+                },
+                "colors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "ProductColor"
+                    }
+                },
+                "sizes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "ProductSize"
+                    }
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "Category"
+                    }
+                },
+                "seeMoreLabel": {
+                    "type": "string"
+                },
+                "seeMoreUrl": {
+                    "type": "string"
+                },
+                "extractDate": {
+                    "type": "string"
+                },
+                "favoriteCount": {
+                    "type": "integer"
+                }
+            },
+            "additionalProperties": {
+                "location": "json"
+            }
+        },
+        "Filter": {
+            "type": "object",
+            "parameters": {
+                "type": {
+                    "type": "enum",
+                    "enum": ["Brand", "Retailer", "Color", "Price", "Sale", "Size"]
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProductsOutput": {
+            "type": "object",
+            "properties": {
+                "metadata": {
+                    "type": "object",
+                    "location": "json",
+                    "properties": {
+                        "category": {
+                            "$ref": "Category"
+                        },
+                        "showSizeFilter": {
+                            "type": "boolean"
+                        },
+                        "showColorFilter": {
+                            "type": "boolean"
+                        },
+                        "freeTextSearches": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "filters": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "Filter"
+                            }
+                        },
+                        "offset": {
+                            "type": "integer"
+                        },
+                        "limit": {
+                            "type": "integer"
+                        },
+                        "total": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "products": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Product"
+                    }
+                }
+            },
+            "additionalProperties": {
+                "location": "json"
+            }
+        },
+        "Histogram": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "HistogramOutput": {
+            "type": "object",
+            "properties": {
+                "metadata": {
+                    "type": "object",
+                    "location": "json",
+                    "properties": {
+                        "category": {
+                            "$ref": "Category"
+                        },
+                        "freeTextSearches": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "filters": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "Filter"
+                            }
+                        },
+                        "total": {
+                            "type": "integer"
+                        },
+                        "histograms": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "name": "histogram",
+                                "properties": {
+                                    "name": {
+                                        "sentAs": "Name",
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "sentAs": "Type",
+                                        "type": "enum",
+                                        "enum": ["Category", "Brand", "Retailer", "Price", "Discount", "Size", "Color"]
+                                    },
+                                    "idPrefix": {
+                                        "sentAs": "IdPrefix",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "categoryHistogram": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Histogram"
+                    }
+                },
+                "brandHistogram": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Histogram"
+                    }
+                },
+                "retailerHistogram": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Histogram"
+                    }
+                },
+                "priceHistogram": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Histogram"
+                    }
+                },
+                "discountHistogram": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Histogram"
+                    }
+                },
+                "sizeHistogram": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Histogram"
+                    }
+                },
+                "colorHistogram": {
+                    "type": "array",
+                    "location": "json",
+                    "items": {
+                        "$ref": "Histogram"
+                    }
+                }
+            }
+        }
+    }
+}
