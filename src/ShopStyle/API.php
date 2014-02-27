@@ -101,7 +101,7 @@ class API
         if (!empty($category)) {
             $params['cat'] = $category;
         }
-        if (!empty($category)) {
+        if (!empty($depth)) {
             $params['depth'] = $depth;
         }
 
