@@ -197,22 +197,22 @@ function getPageUrl($url, $page, $query, $perPage)
     <span>
         <?php if ($currentPage != 1): ?>
             <a href="<?=getPageUrl($selfUrl, ($currentPage - 1), $queryStr, $perPage) ?>">Prev</a>
-        <? endif ?>
+        <?php endif ?>
 
         <?php if ($currentPage < ceil($totalCount / $perPage)): ?>
             <a href="<?=getPageUrl($selfUrl, ($currentPage + 1), $queryStr, $perPage) ?>">Next</a>
-        <? endif ?>
+        <?php endif ?>
     </span>
 <span>
 <div class="clear"></div>
 
 <div class="results">
     <?php foreach ($result->products as $product): ?>
-        <table class="productImage" style="width:<?=$product->images[2]->width?>px;">
+        <table class="productImage" style="width:<?=$product->image->sizes->XLarge->width?>px;">
             <tr>
                 <td class="thumb">
                     <a href="<?=$product->clickUrl?>">
-                        <img src="<?=$product->images[2]->url?>"/>
+                        <img src="<?=$product->image->sizes->XLarge->url?>"/>
                     </a>
                 </td>
             </tr>
